@@ -69,6 +69,7 @@ def update_meta():
     clear()
     banner()
     dump_ch_list(get_meta(api_host))
+    print "For help please type 'h' or '?'"
     t = threading.Timer(update_interval, update_meta)
     t.daemon = True
     t.start()
@@ -100,8 +101,8 @@ def player_controls():
         try:
             cmd = raw_input("> ").lower()
             if cmd == "h" or cmd =="?":
-                print "Help\n===\nz = play \
-                    \nx = select new channel\nc = stop \
+                print "Help\n===\nz = stop \
+                    \nx = select new channel\nc = play \
                     \nv = refresh meta & clear screen\nq = quit\nh = help"
             # set command, e.g. set update_interval 10
             # set ...
@@ -109,21 +110,21 @@ def player_controls():
                 print "Shutting down."
                 p.stop()
                 exit()
-            elif cmd == "z":
+            elif cmd == "c":
                 print "Playing.\n"
                 p.play()
             elif cmd == "x":
                 p.stop()
                 clear()
                 break
-            elif cmd == "c":
+            elif cmd == "z":
                 print "Stopped.\n"
                 p.stop()
             elif cmd == "v":
                 clear()
                 banner()
                 dump_ch_list(get_meta(api_host))
-
+                print "For help please type 'h' or '?'"
         except KeyboardInterrupt:
             p.stop()
             print "\nShutting down."
