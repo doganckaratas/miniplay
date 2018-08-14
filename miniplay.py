@@ -48,7 +48,7 @@ def get_ch_url(jsonresp, chan):
 
 def dump_ch_list(jsonresp):
     for i, chan in enumerate(get_ch_list(jsonresp)):
-        print u"{}: {:<15} | {}: {} - {}".format(i, chan,
+        print u"{}: {:<15} | {}: {} - {}".format(i + 1, chan,
            get_ch_timeline(jsonresp, chan)['songStatus'].title(),
            get_ch_timeline(jsonresp, chan)['songTitle'],
            get_ch_timeline(jsonresp, chan)['artistTitle'])
@@ -81,7 +81,7 @@ def player_controls():
     sel = raw_input("\nPlease select channel (with number or typing name)or hit CTRL+C to exit:")
     ch = get_ch_list(js)
     try:
-        sel = ch[int(sel)]
+        sel = ch[int(sel) + 1]
     except ValueError:
         pass
     if sel not in ch:
