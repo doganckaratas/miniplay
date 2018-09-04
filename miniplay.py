@@ -16,6 +16,7 @@ def clear():
     os.system('cls' if os.name=='nt' else 'clear')
 
 def banner():
+    clear()
     print "miniplay v1 // written by dogan c. karatas\nCurrent Channel: {} \
         \n\nChannel List:".format(current_channel)
 
@@ -48,7 +49,7 @@ def get_ch_url(jsonresp, chan):
 
 def dump_ch_list(jsonresp):
     for i, chan in enumerate(get_ch_list(jsonresp)):
-        print u"{}: {:<15} | {}: {} - {}".format(i + 1, chan,
+        print u"{:3}: {:<15} | {}: {} - {}".format(i + 1, chan,
            get_ch_timeline(jsonresp, chan)['songStatus'].title(),
            get_ch_timeline(jsonresp, chan)['songTitle'],
            get_ch_timeline(jsonresp, chan)['artistTitle'])
@@ -63,10 +64,10 @@ def create_player(url):
     player = instance.media_player_new()
     media = instance.media_new(url)
     player.set_media(media)
+    player.audio_set_volume(100)
     return player
 
 def update_meta():
-    clear()
     banner()
     dump_ch_list(get_meta(api_host))
     print "For help please type 'h' or '?'"
@@ -74,24 +75,31 @@ def update_meta():
     t.daemon = True
     t.start()
 
-def player_controls():
+def load_ch(ch):
     global current_channel
-    js= get_meta(api_host)
-    update_meta()
-    sel = raw_input("\nPlease select channel (with number or typing name)or hit CTRL+C to exit:")
-    ch = get_ch_list(js)
+    js = get_meta(api_host)
+    chan = get_ch_list(js)
+    selected = ''
     try:
-        sel = ch[int(sel) + 1]
+        selected = chan[int(ch) - 1]
     except ValueError:
         pass
-    if sel not in ch:
-        print "Wrong channel selected."
+
+    if selected not in chan:
+        print "Wrong Channel Selected."
         exit()
-    current_channel = sel
-    clear()
+    current_channel = selected
+
+    return create_player(get_ch_url(js, current_channel))
+
+def player_controls():
+    global current_channel
     banner()
-    dump_ch_list(get_meta(api_host))
-    p = create_player(get_ch_url(js, sel))
+    js = get_meta(api_host)
+    dump_ch_list(js)
+    update_meta()
+    sel = raw_input("\nPlease select channel (with number or typing name)or hit CTRL+C to exit:")
+    p = load_ch(sel)
     print "For help please type 'h' or '?'"
     #print json.dumps(js, indent=4)
     #p = create_player(get_ch_url(js, "radyofenomen"))
@@ -102,11 +110,53 @@ def player_controls():
             cmd = raw_input("> ").lower()
             if cmd == "h" or cmd =="?":
                 print "Help\n===\nz = stop \
-                    \nx = select new channel\nc = play \
-                    \nv = refresh meta & clear screen\nq = quit\nh = help"
+                    \nx = stop and select new channel\nc = play\
+                    \nv = refresh meta & clear screen\nq = quit\
+		    \n[1-10] = select channel quickly\nh = help"
             # set command, e.g. set update_interval 10
             # set ...
-            elif cmd == "q":
+	    elif cmd == "1":
+		p.stop()
+                # p = load_ch("radyofenomen")
+		p = load_ch(1)
+		p.play()
+	    elif cmd == "2":
+		p.stop()
+		p = load_ch(2)
+		p.play()
+	    elif cmd == "3":
+		p.stop()
+		p = load_ch(3)
+		p.play()
+	    elif cmd == "4":
+		p.stop()
+		p = load_ch(4)
+		p.play()
+	    elif cmd == "5":
+		p.stop()
+		p = load_ch(5)
+		p.play()
+	    elif cmd == "6":
+		p.stop()
+		p = load_ch(6)
+		p.play()
+	    elif cmd == "7":
+		p.stop()
+		p = load_ch(7)
+		p.play()
+	    elif cmd == "8":
+		p.stop()
+		p = load_ch(8)
+		p.play()
+	    elif cmd == "9":
+		p.stop()
+		p = load_ch(9)
+		p.play()
+	    elif cmd == "10":
+		p.stop()
+		p = load_ch(10)
+		p.play()
+            elif cmd == ":q" or cmd == "q":
                 print "Shutting down."
                 p.stop()
                 exit()
@@ -121,7 +171,6 @@ def player_controls():
                 print "Stopped.\n"
                 p.stop()
             elif cmd == "v":
-                clear()
                 banner()
                 dump_ch_list(get_meta(api_host))
                 print "For help please type 'h' or '?'"
