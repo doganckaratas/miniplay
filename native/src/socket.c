@@ -56,34 +56,62 @@ int socket_get_api()
 {
 	char *api_host = "api.radyofenomen.com";
 	char *api_key  = "/Channels/?appRef=FenomenWebV2";
-	char *api_request = "GET %s HTTP/2.0\r\n"
+	char *api_request = "GET %s HTTP/1.1\r\n"
 				"Host: %s\r\n"
-				"User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0\r\n"
-				"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
-				"Accept-Language: en-US,en;q=0.5\r\n"
-				"Accept-Encoding: gzip, deflate, br\r\n"
-				"DNT: 1\r\n"
+				"Accept: text/html,application/xhtml+xml,application/xml;\r\n"
 				"Connection: keep-alive\r\n"
+				"Keep-Alive: timeout=5, max=15\r\n"
 				"Content-Type: text/html\r\n"
-				"Upgrade-Insecure-Requests: 1\r\n"
 				"Pragma: no-cache\r\n"
 				"Cache-Control: no-cache\r\n"
 				"TE: Trailers\r\n\r\n";
 	int sockfd = 0;
 	char *ip = NULL;
-	int port = 443;
+	int port = 80;
+	int bytes = 0;
+	char chunk[65536] = {0};
+	char *request = NULL;
+	char *response = NULL;
+	char *body = NULL;
+
 	socket_open(&sockfd);
 	socket_resolve_host(api_host, &ip);
 	logger->log_d("Host: %s IP: %s\n", api_host, ip);
 	logger->log_i("Connecting...\n");
 	socket_connect(&sockfd, ip, port);
-	char *request = NULL;
-	char *response[65536] = {0};
 	asprintf(&request, api_request, api_key, api_host);
 	logger->log_d("Request: \n%s\n", request);
-	logger->log_d("Bytes sent: %d\n",send(sockfd, request, strlen(request), 0));
-	logger->log_d("Bytes received: %d\n",recv(sockfd, response, 65536, 0));
-	logger->log_d("Response: %s\n", response);
+	logger->log_t("%s, Bytes sent: %d\n", strerror(errno), send(sockfd, request, strlen(request), 0));
+	bytes = recv(sockfd, chunk, 65536, 0);
+	logger->log_t("%s, Bytes received: %d\n", strerror(errno), bytes);
+	body = strstr(chunk, "\r\n\r\n");
+	if (body) {
+		body += 4;
+	}
+
+	strtok(body, "\r\n");
+	body = strtok(NULL,"\r\n");
+
+	logger->log_t("Chunk: %s\n", body);
+	asprintf(&response, "%s", body);
+
+	while (bytes > 0) {
+		bytes = recv(sockfd, chunk, 65536, MSG_CMSG_CLOEXEC);
+		logger->log_t("%s, Bytes received: %d\n", strerror(errno), bytes);
+
+		body = chunk;
+		strtok(body, "\r\n");
+		if (body == NULL) {
+			continue;
+		}
+		asprintf(&response, "%s%s", response, body);
+		logger->log_t("Chunk: %s\n", body);
+		memset(chunk, 0, 65536);
+
+
+	}
+
+	logger->log_d("Response JSON: %s\n", response);
 	socket_close(&sockfd);
 	free(ip);
 	return 0;
@@ -91,6 +119,7 @@ int socket_get_api()
 
 int socket_open(int *fd)
 {
+	struct timeval tv;
 	if (!fd) {
 		return -1;
 	}
@@ -101,6 +130,11 @@ int socket_open(int *fd)
 		perror("");
 		return -2;
 	}
+
+	tv.tv_sec = 5;
+	tv.tv_usec = 0;
+	setsockopt(*fd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv,sizeof(struct timeval));
+
 	return 0;
 }
 

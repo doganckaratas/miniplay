@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 {
 	/* Terminal Setup */
 	logger_init(&logger);
-	logger_set_level(logger, LOG_DBG);
+	logger_set_level(logger, LOG_TRACE);
 	logger->log_i("miniplay-ng "VER" \n");
 	socket_get_api();
 	logger_destroy(&logger);

@@ -5,6 +5,16 @@
 #include "common.h"
 
 /* Private Functions */
+static void logger_trace(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	printf(DPURPLE"[TRACE]"NORM" ");
+	vprintf(fmt, args);
+	va_end(args);
+	return;
+}
+
 static void logger_debug(const char *fmt, ...)
 {
 	va_list args;
@@ -56,25 +66,36 @@ void logger_set_level(Logger *logger, enum log_level_e lvl)
 	logger->level = lvl;
 
 	switch (logger->level) {
-		case LOG_DBG:
+		case LOG_TRACE:
+			logger->log_t = &logger_trace;
 			logger->log_i = &logger_info;
 			logger->log_d = &logger_debug;
 			logger->log_e = &logger_error;
 
 		break;
-		case LOG_INF:
+		case LOG_DEBUG:
+			logger->log_t = &logger_null;
+			logger->log_i = &logger_info;
+			logger->log_d = &logger_debug;
+			logger->log_e = &logger_error;
+
+		break;
+		case LOG_INFO:
+			logger->log_t = &logger_null;
 			logger->log_i = &logger_info;
 			logger->log_d = &logger_null;
 			logger->log_e = &logger_error;
 
 		break;
-		case LOG_ERR:
+		case LOG_ERROR:
+			logger->log_t = &logger_null;
 			logger->log_i = &logger_null;
 			logger->log_d = &logger_null;
 			logger->log_e = &logger_error;
 
 		break;
 		default:
+			logger->log_t = &logger_null;
 			logger->log_i = &logger_null;
 			logger->log_d = &logger_null;
 			logger->log_e = &logger_null;

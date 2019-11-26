@@ -4,9 +4,10 @@
 #define VER "0.1b"
 
 enum log_level_e {
-	LOG_ERR,
-	LOG_DBG,
-	LOG_INF
+	LOG_ERROR,
+	LOG_DEBUG,
+	LOG_INFO,
+	LOG_TRACE
 };
 
 #define NORM	"\33[0m"
@@ -29,6 +30,7 @@ enum log_level_e {
 
 typedef struct {
 	enum log_level_e level;
+	void (*log_t)(const char *fmt, ...);
 	void (*log_i)(const char *fmt, ...);
 	void (*log_d)(const char *fmt, ...);
 	void (*log_e)(const char *fmt, ...);
