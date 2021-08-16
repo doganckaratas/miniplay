@@ -48,7 +48,7 @@ def get_ch_url(jsonresp, chan):
 
 def dump_ch_list(jsonresp):
     for i, chan in enumerate(get_ch_list(jsonresp)):
-        print(u"{:3}: {:<15} | {}: {} - {}".format(i + 1, chan,
+        print(u"{:3}: {:<17} | {}: {} - {}".format(i + 1, chan,
            get_ch_timeline(jsonresp, chan)['songStatus'].title(),
            get_ch_timeline(jsonresp, chan)['songTitle'],
            get_ch_timeline(jsonresp, chan)['artistTitle']))
@@ -154,6 +154,14 @@ def player_controls():
             elif cmd == "10":
                 p.stop()
                 p = load_ch(10)
+                p.play()
+            elif cmd == "11":
+                p.stop()
+                p = load_ch(11)
+                p.play()
+            elif cmd == "12":
+                p.stop()
+                p = load_ch(12)
                 p.play()
             elif cmd == ":q" or cmd == "q":
                 print("Shutting down.")
